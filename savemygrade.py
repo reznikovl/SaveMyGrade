@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 
 file = pd.ExcelFile(r'grades.xlsx')
+def get_quarters():
+    return file.sheet_names
 def median(column, gpas):
     n = 0
     half_students = np.sum(column)/2
@@ -57,6 +59,7 @@ def plot(course, quarter, professors, percentage):
     if percentage:
         fig.update_layout(yaxis_tickformat = '%')
     # fig.show()
+    print('right before return')
     return fig
 
 # course = 'MATH 8'

@@ -10,6 +10,13 @@ def get_classes_based_off_quarter(quarter):
     data = pd.read_excel(file, quarter)
     data.Course = data.Course.replace('\s+', ' ', regex=True)
     return data['Course'].unique()
+
+def get_professor_based_off_class_and_quarter(course, quarter):
+    data = pd.read_excel(file, quarter)
+    data.Course = data.Course.replace('\s+', ' ', regex=True)
+    courses =  data[data['Course'] == course]
+    return courses['Instructor'].unique()
+
 def median(column, gpas):
     n = 0
     half_students = np.sum(column)/2
@@ -34,7 +41,7 @@ def plot(course, quarter, professors, percentage):
 
     statistics = []
 
-    if len(professors) == 0:
+    if not professors or len(professors) == 0:
         professors = df['Instructor'].unique()
     for professor in professors:
         other = df[df['Instructor'] == professor][['Grade Given', 'Sum of Student Count']]
@@ -64,7 +71,6 @@ def plot(course, quarter, professors, percentage):
     if percentage:
         fig.update_layout(yaxis_tickformat = '%')
     # fig.show()
-    print('right before return')
     return fig
 
 # course = 'MATH 8'

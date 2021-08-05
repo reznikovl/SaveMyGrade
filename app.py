@@ -37,7 +37,7 @@ app.layout = html.Div([
 ])
 
 @app.callback(
-    Output('courses', 'options'),
+    Output('class_dropdown', 'options'),
     Input('quarter_dropdown', 'value')
 )
 def set_courses_options(selected_quarter):
@@ -46,8 +46,8 @@ def set_courses_options(selected_quarter):
     Output('class_dropdown', 'value'),
     Input('class_dropdown', 'options')
 )
-# def set_courses_value(available_options):
-#     return available_options[0]['value']
+def set_courses_value(available_options):
+    return available_options[0]['value']
 
 @app.callback(
     Output("bar-chart", "figure"),
@@ -55,7 +55,7 @@ def set_courses_options(selected_quarter):
 )
 
 
-def update_bar_chart(percent, quarter):
+def update_bar_chart(percent, quarter, course):
     # mask = df["day"] == day
     # fig = px.bar(df[mask], x="sex", y="total_bill", 
     #              color="smoker", barmode="group")
@@ -64,6 +64,6 @@ def update_bar_chart(percent, quarter):
     # app.logger.info(plot(course='MATH 8', quarter='Fall 2020', percentage=False, professors=[]))
     app.logger.info(percent)
     show_percent = True if percent == 'True' else False
-    return plot(course='CMPSC 64', quarter=quarter, percentage=show_percent, professors=[])
+    return plot(course=course, quarter=quarter, percentage=show_percent, professors=[])
 
 app.run_server(debug=True)

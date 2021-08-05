@@ -5,11 +5,11 @@ import plotly.express as px
 file = pd.ExcelFile(r'grades.xlsx')
 def get_quarters():
     return file.sheet_names
+
 def get_classes_based_off_quarter(quarter):
     data = pd.read_excel(file, quarter)
     data.Course = data.Course.replace('\s+', ' ', regex=True)
-    data['Course'].unique()
-
+    return data['Course'].unique()
 def median(column, gpas):
     n = 0
     half_students = np.sum(column)/2

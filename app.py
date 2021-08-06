@@ -24,7 +24,6 @@ app.layout = html.Div([
         options=[{"label": x, "value": x} for x in reversed(get_quarters())],
         value=['Winter 2020'],
         style={'width': dropdown_width},
-        # clearable=False
     ),
     html.Br(),
     'Course',
@@ -56,7 +55,25 @@ app.layout = html.Div([
     dcc.Graph(id="bar-chart"),
     dash_table.DataTable(
         id='statistics_table',
-        columns=[{'name': 'Professor', 'id': 'Professor'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Mean', 'id': 'Mean'}, {'name': 'Standard Deviation', 'id': 'Standard Deviation'}],
+        columns=[{'name': 'Professor', 'id': 'Professor'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Average', 'id': 'Average'}, {'name': 'Standard Deviation', 'id': 'Standard Deviation'}],
+        style_table={'overflowX': 'auto', 'width': '750px'},
+        style_cell={
+            'minWidth': '150px', 'width': '150px', 'maxWidth': '300px', 'textAlign': 'left',
+            'font_family': 'Open Sans'
+        },
+        style_cell_conditional=[
+            {'if': {'column_id': 'Professor'},
+            'width': '200%'}
+        ],
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(240, 240, 240)'
+            }
+        ],
+        style_header={
+            'backgroundColor': 'rgb(225, 225, 225)'
+        }
     )
 ])
 

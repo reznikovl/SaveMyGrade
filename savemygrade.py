@@ -40,14 +40,24 @@ def get_professor_based_off_class_and_quarter(course, quarters):
 
     return [professors, only_course]
 
+def avg(counts, gpas):
+    return np.sum(np.dot(counts, gpas)) / np.sum(counts)
 
-def median(column, gpas):
+def median(counts, gpas):
     n = 0
-    half_students = np.sum(column)/2
+    half_students = np.sum(counts)/2
     for i in range(len(gpas)):
-        n += column[i]
+        n += counts[i]
         if (n > half_students):
             return gpas[i]
+
+def std_dev(counts, gpas):
+    mean = avg(counts, gpas)
+    result = 0
+    for i in range(len(gpas)):
+        result += ((gpas[i] - mean)**2) * counts[i]
+    return (result/np.sum(counts))**(0.5)
+
 
 def getStatistics():
     return statistics
@@ -68,7 +78,7 @@ def plot(course, quarters, professors, percentage, dataframe):
         other.columns = ['Grade', professor]
 
         counts = pd.DataFrame({'Grade': labels}).set_index('Grade').join(other.set_index('Grade'))[professor].fillna(0)
-        statistics.append({'Professor': professor, 'Median': str(median(counts, gpas)), 'Mean': str(np.sum(np.dot(counts, gpas)) / np.sum(counts)), 'Standard Deviation': str(0)})
+        statistics.append({'Professor': professor, 'Median': str(median(counts, gpas)), 'Average': str(round(avg(counts, gpas), 2)), 'Standard Deviation': str(round(std_dev(counts, gpas), 2))})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)
@@ -85,7 +95,7 @@ def plot(course, quarters, professors, percentage, dataframe):
             'value': 'Percentage of Students' if percentage else 'Number of Students',
             'variable': 'Professor'
         },
-        title=course + ' – ' + quarters[0],
+        title=course,
         barmode='group'
     )
     if percentage:

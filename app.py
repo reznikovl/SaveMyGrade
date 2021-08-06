@@ -1,12 +1,8 @@
 import dash
+import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.express as px
-import random
-
-import numpy as np
-import pandas as pd
 
 from savemygrade import *
 
@@ -15,15 +11,20 @@ app = dash.Dash(__name__)
 
 dropdown_width='60%'
 
+dataframe = None
+default_percent = 'True'
+default_course = None
+populate_quarter_sheets()
+
 app.layout = html.Div([
     html.Center(html.H1('Let\'s Save Your Grade!')),
     'Quarter',
-    dcc.Dropdown(
-        id="quarter_dropdown",
+    dcc.Checklist(
+        id="quarter_checklist",
         options=[{"label": x, "value": x} for x in reversed(get_quarters())],
-        value='Winter 2020',
+        value=['Winter 2020'],
         style={'width': dropdown_width},
-        clearable=False
+        # clearable=False
     ),
     html.Br(),
     'Course',
@@ -40,7 +41,7 @@ app.layout = html.Div([
     dcc.Dropdown(
         id="percent_dropdown",
         options=[{'label': 'Show Percentage of Students', 'value': 'True'}, {'label': 'Show Number of Students', 'value': 'False'}],
-        value='True',
+        value=default_percent,
         style={'width': dropdown_width},
         clearable=False,
     ),
@@ -48,53 +49,72 @@ app.layout = html.Div([
     html.Br(),
     'Professors:',
     dcc.Checklist(
-        id="professor_checklist"
+        id="professor_checklist",
+        labelStyle={'display': 'block'}
+        # labelStyle={'display': 'flex', 'flexFlow': 'row wrap'}
     ),
     dcc.Graph(id="bar-chart"),
+    dash_table.DataTable(
+        id='statistics_table',
+        columns=[{'name': 'Professor', 'id': 'Professor'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Mean', 'id': 'Mean'}, {'name': 'Standard Deviation', 'id': 'Standard Deviation'}],
+    )
 ])
 
 @app.callback(
     Output('class_dropdown', 'options'),
-    Input('quarter_dropdown', 'value')
+    Input('quarter_checklist', 'value')
 )
-def set_courses_options(selected_quarter):
-    return [{'label': x, 'value': x} for x in get_classes_based_off_quarter(selected_quarter)]
+
+def set_courses_options(selected_quarters):
+    return [{'label': x, 'value': x} for x in get_classes_based_off_quarter(selected_quarters)]
+
 @app.callback(
     Output('class_dropdown', 'value'),
     Input('class_dropdown', 'options')
 )
+
 def set_courses_value(available_options):
+    if default_course in [h['value'] for h in available_options]:
+        return default_course
     return available_options[0]['value']
 
 @app.callback(
     Output('professor_checklist', 'options'),
-    Input('quarter_dropdown', 'value'),
+    Input('quarter_checklist', 'value'),
     Input('class_dropdown', 'value')
 )
-def set_professor_options(selected_quarter, selected_class):
-    return [{'label': x, 'value': x} for x in get_professor_based_off_class_and_quarter(selected_class, selected_quarter)]
+
+def set_professor_options(selected_quarters, selected_class):
+    global dataframe
+    professors, dataframe = get_professor_based_off_class_and_quarter(selected_class, selected_quarters)
+    return [{'label': x, 'value': x} for x in professors]
+
 @app.callback(
     Output('professor_checklist', 'value'),
     Input('professor_checklist', 'options')
 )
+
 def set_professor_value(available_options):
     return [available_options[0]['value']]
 
 @app.callback(
     Output("bar-chart", "figure"),
-    [Input("percent_dropdown", "value"), Input("quarter_dropdown", "value"), Input("class_dropdown", "value"), Input('professor_checklist', 'value')]
+    [Input("percent_dropdown", "value"), Input("quarter_checklist", "value"), Input("class_dropdown", "value"), Input('professor_checklist', 'value')]
 )
 
-
-def update_bar_chart(percent, quarter, course, professors):
-    # mask = df["day"] == day
-    # fig = px.bar(df[mask], x="sex", y="total_bill", 
-    #              color="smoker", barmode="group")
-    # return fig
-    # return f"From form 1: {day1}, and from form 2: {day2}"
-    # app.logger.info(plot(course='MATH 8', quarter='Fall 2020', percentage=False, professors=[]))
-    app.logger.info(percent)
+def update_bar_chart(percent, quarters, course, professors):
+    global default_percent, default_course
+    default_percent = percent
+    default_course = course
     show_percent = True if percent == 'True' else False
-    return plot(course=course, quarter=quarter, percentage=show_percent, professors=professors)
+    return plot(course=course, quarters=quarters, percentage=show_percent, professors=professors, dataframe=dataframe)
 
-app.run_server(debug=True)
+@app.callback(
+    Output('statistics_table', 'data'),
+    Input('bar-chart', 'figure')
+)
+
+def update_table(figure):
+    return getStatistics()
+
+app.run_server(debug=True, host='0.0.0.0')

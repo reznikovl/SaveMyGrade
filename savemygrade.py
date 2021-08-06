@@ -1,21 +1,45 @@
+from os import stat
 import numpy as np
 import pandas as pd
 import plotly.express as px
+from collections import Counter
 
 file = pd.ExcelFile(r'grades.xlsx')
+quarter_sheets = dict()
+statistics = []
+
 def get_quarters():
     return file.sheet_names
 
-def get_classes_based_off_quarter(quarter):
-    data = pd.read_excel(file, quarter)
-    data.Course = data.Course.replace('\s+', ' ', regex=True)
+def populate_quarter_sheets():
+    if len(quarter_sheets) == 0:
+        for q in get_quarters():
+            d = file.parse(q)
+            d['Instructor'] = d['Instructor'] + ' (' + q + ')'
+            d.Course = d.Course.replace('\s+', ' ', regex=True)
+            quarter_sheets[q] = d
+
+def get_classes_based_off_quarter(quarters):
+    data = pd.concat([quarter_sheets[q] for q in quarters])
     return data['Course'].unique()
 
-def get_professor_based_off_class_and_quarter(course, quarter):
-    data = pd.read_excel(file, quarter)
-    data.Course = data.Course.replace('\s+', ' ', regex=True)
-    courses =  data[data['Course'] == course]
-    return courses['Instructor'].unique()
+def get_professor_based_off_class_and_quarter(course, quarters):
+    data = pd.concat([quarter_sheets[q] for q in quarters])
+    only_course = data[data['Course'] == course]
+    professors = only_course['Instructor'].unique()
+
+    unique_professors_dict = Counter([p.split(' (')[0] for p in professors])
+    unique_professors = []
+    for p in professors:
+        if unique_professors_dict[p.split(' (')[0]] > 1:
+            unique_professors.append(p)
+        else:
+            unique_professors.append(p.split(' (')[0])
+            only_course = only_course.replace(p, p.split(' (')[0])
+    professors = unique_professors
+
+    return [professors, only_course]
+
 
 def median(column, gpas):
     n = 0
@@ -25,30 +49,26 @@ def median(column, gpas):
         if (n > half_students):
             return gpas[i]
 
+def getStatistics():
+    return statistics
+
 #——————————————————————————————————————————————————————————#
 
-
-#——————————————————————————————————————————————————————————#
-def plot(course, quarter, professors, percentage):
-    data = pd.read_excel(file, quarter)
-    data.Course = data.Course.replace('\s+', ' ', regex=True)
-
-    df = data[data['Course'] == course]
-
+def plot(course, quarters, professors, percentage, dataframe):
     labels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
     gpas = [4.0, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7, 1.3, 1.0, 0.7, 0.0]
     cols = pd.DataFrame({'Grade': labels})
 
-    statistics = []
+    # if not professors or len(professors) == 0:
+    #     do something
+    statistics.clear()
 
-    if not professors or len(professors) == 0:
-        professors = df['Instructor'].unique()
     for professor in professors:
-        other = df[df['Instructor'] == professor][['Grade Given', 'Sum of Student Count']]
+        other = dataframe[dataframe['Instructor'] == professor][['Grade Given', 'Sum of Student Count']]
         other.columns = ['Grade', professor]
 
         counts = pd.DataFrame({'Grade': labels}).set_index('Grade').join(other.set_index('Grade'))[professor].fillna(0)
-        statistics.append([ professor, np.sum(np.dot(counts, gpas)) / np.sum(counts), median(counts, gpas) ])
+        statistics.append({'Professor': professor, 'Median': str(median(counts, gpas)), 'Mean': str(np.sum(np.dot(counts, gpas)) / np.sum(counts)), 'Standard Deviation': str(0)})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)
@@ -65,17 +85,9 @@ def plot(course, quarter, professors, percentage):
             'value': 'Percentage of Students' if percentage else 'Number of Students',
             'variable': 'Professor'
         },
-        title=course + ' – ' + quarter,
+        title=course + ' – ' + quarters[0],
         barmode='group'
     )
     if percentage:
         fig.update_layout(yaxis_tickformat = '%')
-    # fig.show()
     return fig
-
-# course = 'MATH 8'
-# quarter = 'Winter 2020'
-# professors = []
-# percentage = True
-
-# plot(course, quarter, professors, percentage)

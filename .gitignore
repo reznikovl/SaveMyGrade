@@ -2,3 +2,8 @@ venv
 *.pyc
 .DS_Store
 .env
+smg
+bin
+lib
+pyvenv.cfg
+include

@@ -12,8 +12,8 @@ quarter_sheets_no_quarter = dict()
 statistics = []
 
 def get_quarters():
-    return ['Winter 2021']
-    # return file.sheet_names
+    # return ['Winter 2021']
+    return file.sheet_names
 
 def populate_quarter_sheets():
     if len(quarter_sheets) == 0:

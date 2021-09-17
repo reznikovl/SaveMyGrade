@@ -399,7 +399,8 @@ def display_page(pathname):
         return about_page_layout
     # You could also return a 404 "URL not found" page here
 
-app.run_server(debug=True
-,dev_tools_ui=False
+app.run_server(
+# debug=True,
+dev_tools_ui=False
 , host='0.0.0.0')
 # app.config.suppress_callback_exceptions = True

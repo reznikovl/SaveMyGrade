@@ -10,7 +10,7 @@ from savemygrade import *
 
 
 app = dash.Dash(title='Save My Grade!', external_stylesheets=[dbc.themes.UNITED])
-font = 'Open Sans, sans-serif'
+font = 'Verdana'
 
 default_store = {'stored_quarters': [], 'stored_department': 0, 'stored_number': 0, 'stored_professors': [], 'stored_percent': 0}
 default_store_index = {'stored_department': 0, 'stored_professor': 0 }

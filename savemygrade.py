@@ -149,10 +149,10 @@ def plot(course, quarters, professors, percentage):
         counts = pd.DataFrame({'Grade': labels}).set_index('Grade').join(other.set_index('Grade'))[professor].fillna(0)
         med = median(counts, gpas) or 'N/A'
         mean = round(avg(counts, gpas), 2)
-        if not np.isnan(mean):
+        if np.isnan(mean):
             mean = 'N/A'
         dev = round(std_dev(counts, gpas), 2)
-        if not np.isnan(dev):
+        if np.isnan(dev):
             dev = 'N/A'
         statistics.append({'Professor': professor, 'Median': str(med), 'Average': str(mean), 'Standard Deviation': str(dev)})
 

@@ -397,7 +397,7 @@ def display_page(pathname):
         return professor_page_layout
     elif pathname == '/about':
         return about_page_layout
-    # You could also return a 404 "URL not found" page here
+    return html.Div('404: Page not found')
 
 app.run_server(
 # debug=True,

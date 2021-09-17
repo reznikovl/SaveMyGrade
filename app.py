@@ -10,6 +10,7 @@ from savemygrade import *
 
 
 app = dash.Dash(title='Save My Grade!', external_stylesheets=[dbc.themes.UNITED])
+font = 'Open Sans, sans-serif'
 
 default_store = {'stored_quarters': [], 'stored_department': 0, 'stored_number': 0, 'stored_professors': [], 'stored_percent': 0}
 default_store_index = {'stored_department': 0, 'stored_professor': 0 }
@@ -34,7 +35,7 @@ app.layout = html.Div([
         style={'padding-left': '170px'}
     ),
     html.Div(id='page-content', style={'padding-left': '180px', 'padding-right': '180px', 'padding-top': '30px', 'padding-bottom': '0px'})
-], style={'font-family': 'Open Sans'})
+], style={'font-family': font})
 
 main_page_layout = html.Div([
     dcc.Store(id='local', storage_type='session'),
@@ -117,7 +118,7 @@ main_page_layout = html.Div([
                 style_table={'overflowX': 'auto'},
                 style_cell={
                     'minWidth': '50px', 'width': '50px', 'maxWidth': '300px', 'textAlign': 'left', 'padding': '8px 8px',
-                    'font-family': 'Open Sans'
+                    'font-family': font
                 },
                 style_data_conditional=[
                     {
@@ -295,7 +296,7 @@ professor_page_layout = html.Div([
         style_table={'overflowX': 'auto', 'maxWidth': '600px'},
         style_cell={
             'minWidth': '50px', 'maxWidth': '300px', 'textAlign': 'left', 'padding': '8px 8px',
-            'font-family': 'Open Sans'
+            'font-family': font
         },
         style_data_conditional=[
             {
@@ -316,7 +317,7 @@ professor_page_layout = html.Div([
         style_table={'overflowX': 'auto', 'maxWidth': '600px'},
         style_cell={
             'minWidth': '150px', 'maxWidth': '300px', 'textAlign': 'left', 'padding': '8px 8px',
-            'font_family': 'Open Sans'
+            'font_family': font
         },
         style_data_conditional=[
             {

@@ -168,7 +168,7 @@ def plot(course, quarters, professors, percentage):
 
     fig = px.bar(cols, labels={
             'Grade': 'Grade',
-            'value': 'Percentage of Students' if percentage else 'Number of Students',
+            'value': 'Percent of Students' if percentage else 'Number of Students',
             'variable': 'Professor'
         },
         barmode='group',

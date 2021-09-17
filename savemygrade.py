@@ -110,19 +110,19 @@ def get_statistics_of_professor(professor):
 
             med = median(counts, gpas) or 'N/A'
             mean = round(avg(counts, gpas), 2)
-            if not np.isnan(mean):
+            if np.isnan(mean):
                 mean = 'N/A'
             dev = round(std_dev(counts, gpas), 2)
-            if not np.isnan(dev):
+            if np.isnan(dev):
                 dev = 'N/A'
             statistics.append({'Quarter': q, 'Course': course, 'Median': str(med), 'Average': str(mean), 'Standard Deviation': str(dev)})
 
     med = median(total_counts, gpas) or 'N/A'
     mean = round(avg(counts, gpas), 2)
-    if not np.isnan(mean):
+    if np.isnan(mean):
         mean = 'N/A'
     dev = round(std_dev(counts, gpas), 2)
-    if not np.isnan(dev):
+    if np.isnan(dev):
         dev = 'N/A'
     return statistics, [{'Overall Median': str(med), 'Overall Average': str(mean), 'Overall Standard Deviation': str(dev)}]
 

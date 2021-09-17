@@ -109,13 +109,21 @@ def get_statistics_of_professor(professor):
                 total_counts = total_counts + counts
 
             med = median(counts, gpas) or 'N/A'
-            mean = mean if not np.isnan(mean := round(avg(counts, gpas), 2)) else 'N/A'
-            dev = dev if not np.isnan(dev := round(std_dev(counts, gpas), 2)) else 'N/A'
+            mean = round(avg(counts, gpas), 2)
+            if not np.isnan(mean):
+                mean = 'N/A'
+            dev = round(std_dev(counts, gpas), 2)
+            if not np.isnan(dev):
+                dev = 'N/A'
             statistics.append({'Quarter': q, 'Course': course, 'Median': str(med), 'Average': str(mean), 'Standard Deviation': str(dev)})
 
     med = median(total_counts, gpas) or 'N/A'
-    mean = mean if not np.isnan(mean := round(avg(total_counts, gpas), 2)) else 'N/A'
-    dev = dev if not np.isnan(dev := round(std_dev(total_counts, gpas), 2)) else 'N/A'
+    mean = round(avg(counts, gpas), 2)
+    if not np.isnan(mean):
+        mean = 'N/A'
+    dev = round(std_dev(counts, gpas), 2)
+    if not np.isnan(dev):
+        dev = 'N/A'
     return statistics, [{'Overall Median': str(med), 'Overall Average': str(mean), 'Overall Standard Deviation': str(dev)}]
 
 #——————————————————————————————————————————————————————————#
@@ -140,8 +148,12 @@ def plot(course, quarters, professors, percentage):
 
         counts = pd.DataFrame({'Grade': labels}).set_index('Grade').join(other.set_index('Grade'))[professor].fillna(0)
         med = median(counts, gpas) or 'N/A'
-        mean = mean if not np.isnan(mean := round(avg(counts, gpas), 2)) else 'N/A'
-        dev = dev if not np.isnan(dev := round(std_dev(counts, gpas), 2)) else 'N/A'
+        mean = round(avg(counts, gpas), 2)
+        if not np.isnan(mean):
+            mean = 'N/A'
+        dev = round(std_dev(counts, gpas), 2)
+        if not np.isnan(dev):
+            dev = 'N/A'
         statistics.append({'Professor': professor, 'Median': str(med), 'Average': str(mean), 'Standard Deviation': str(dev)})
 
         if percentage:

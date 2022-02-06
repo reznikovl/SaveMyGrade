@@ -99,8 +99,10 @@ main_page_layout = html.Div([
                     dcc.Dropdown(
                         id="quarter_dropdown",
                         options=[{"label": x, "value": x} for x in reversed(get_quarters())],
-                        value=['Winter 2020'],
-                        multi=True
+                        value=['Winter 2021'],
+                        multi=True,
+                        optionHeight=25
+                        # style={'max-height': '70px', 'overflow-y': 'visible'}
                     )
                 ], style={'padding': '0px'})
             ])
@@ -109,14 +111,16 @@ main_page_layout = html.Div([
             html.H6('Dept.'),
             dcc.Dropdown(
                 id="department_dropdown",
-                clearable=False
+                clearable=False,
+                optionHeight=25
             )
         ], width=1, style={'padding-right': '0px', 'margin-right': '0px'}),
         dbc.Col([
             html.H6('#'),
             dcc.Dropdown(
                 id="number_dropdown",
-                clearable=False
+                clearable=False,
+                optionHeight=25
             ),
         ], width=1, style={'padding-left': '0px', 'margin-left': '0px'}),
         dbc.Col([
@@ -143,7 +147,8 @@ main_page_layout = html.Div([
                 dbc.Col([
                     dcc.Dropdown(
                         id="professor_dropdown",
-                        multi=True
+                        multi=True,
+                        optionHeight=25
                     )
                 ], style={'padding': '0px'})
             ])
@@ -153,7 +158,8 @@ main_page_layout = html.Div([
             dcc.Dropdown(
                 id="percent_dropdown",
                 options=[{'label': 'Percent of Students', 'value': 'True'}, {'label': 'Number of Students', 'value': 'False'}],
-                clearable=False
+                clearable=False,
+                optionHeight=25
             )
         ], width=2),
     ]),
@@ -494,7 +500,7 @@ def display_page(pathname):
     return html.Div('404: Page not found')
 
 app.run_server(
-debug=True,
+# debug=True,
 dev_tools_ui=False
 , host='0.0.0.0')
 # app.config.suppress_callback_exceptions = False

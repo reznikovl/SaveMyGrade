@@ -166,7 +166,7 @@ main_page_layout = html.Div([
         dbc.Col(
             dash_table.DataTable(
                 id='statistics_table',
-                columns=[{'name': 'Professor', 'id': 'Professor'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Average', 'id': 'Average'}, {'name': 'Standard Deviation', 'id': 'Standard Deviation'}],
+                columns=[{'name': 'Professor', 'id': 'Professor'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Average', 'id': 'Average'}, {'name': 'Deviation', 'id': 'Standard Deviation'}, {'name': 'Count', 'id': 'Count'}],
                 sort_action="native",
                 sort_mode="multi",
                 style_table={'overflowX': 'auto'},
@@ -375,7 +375,7 @@ professor_page_layout = html.Div([
     html.Br(),
     dash_table.DataTable(
         id='statistics_table_index',
-        columns=[{'name': 'Quarter', 'id': 'Quarter'}, {'name': 'Course', 'id': 'Course'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Average', 'id': 'Average'}, {'name': 'Standard Deviation', 'id': 'Standard Deviation'}],
+        columns=[{'name': 'Quarter', 'id': 'Quarter'}, {'name': 'Course', 'id': 'Course'}, {'name': 'Median', 'id': 'Median'}, {'name': 'Average', 'id': 'Average'}, {'name': 'Deviation', 'id': 'Standard Deviation'}, {'name': 'Count', 'id': 'Count'}],
         sort_action="native",
         sort_mode="multi",
         style_table={'overflowX': 'auto', 'maxWidth': '600px'},
@@ -396,7 +396,7 @@ professor_page_layout = html.Div([
     html.Br(),
     dash_table.DataTable(
         id='statistics_table_index_cumulative',
-        columns=[{'name': 'Overall Median', 'id': 'Overall Median'}, {'name': 'Overall Average', 'id': 'Overall Average'}, {'name': 'Overall Standard Deviation', 'id': 'Overall Standard Deviation'}],
+        columns=[{'name': 'Overall Median', 'id': 'Overall Median'}, {'name': 'Overall Average', 'id': 'Overall Average'}, {'name': 'Overall Deviation', 'id': 'Overall Standard Deviation'}],
         sort_action="native",
         sort_mode="multi",
         style_table={'overflowX': 'auto', 'maxWidth': '600px'},

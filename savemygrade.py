@@ -7,6 +7,7 @@ import plotly.express as px
 from collections import Counter
 
 labels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+labels_non_letter = ['P', 'NP', 'S']
 gpas = [4.0, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7, 1.3, 1.0, 0.7, 0.0]
 na = '---'
 
@@ -16,11 +17,9 @@ quarter_sheets_no_quarter = dict()
 statistics = []
 
 def get_quarters():
-    # return ['Winter 2021', 'Fall 2020', 'Spring 2020', 'Winter 2020', 'Fall 2019', 'Spring 2019']
     return file.sheet_names
 
 def populate_quarter_sheets():
-    print('begin pop')
     if len(quarter_sheets) == 0:
         for q in get_quarters():
             path = 'data/' + q + '.txt'
@@ -39,9 +38,10 @@ def populate_quarter_sheets():
                 f = open(path, 'w+')
                 f.write(json.dumps(json.loads(d.to_json())))
                 f.close()
-            d['Instructor'] = d['Instructor'] + ' (' + q + ')'
+
+            abbrev = ('M' if q.startswith('Summer') else q[0]) + q.split(' ')[1][2:]
+            d['Instructor'] = d['Instructor'] + ' (' + abbrev + ')'
             quarter_sheets[q] = d
-    print('end pop')
 
 
 def get_departments_based_off_quarter(quarters):
@@ -140,7 +140,7 @@ def get_statistics_of_professor(professor, show_na):
                 dev = na
 
             if (show_na or not (med is na or mean is na or dev is na)):
-                statistics.append({'Quarter': q, 'Course': course, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev)})
+                statistics.append({'Quarter': q, 'Course': course, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev), 'Count': sum(df[professor])})
 
     med = median(total_counts, gpas) or na
     mean = round(avg(total_counts, gpas), 2)
@@ -179,7 +179,7 @@ def plot(course, quarters, professors, percentage):
         dev = round(std_dev(counts, gpas), 2)
         if np.isnan(dev):
             dev = na
-        statistics.append({'Professor': professor, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev)})
+        statistics.append({'Professor': professor, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev), 'Count': sum(other[professor])})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)
@@ -216,7 +216,7 @@ def plot(course, quarters, professors, percentage):
             yaxis = { "visible": False },
             annotations = [
                 {   
-                    "text": "No data found",
+                    "text": "No letter-grade data found",
                     "xref": "paper",
                     "yref": "paper",
                     "showarrow": False,

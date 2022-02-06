@@ -43,14 +43,68 @@ main_page_layout = html.Div([
     html.Br(),
     dbc.Row([
         dbc.Col([
-            html.H6('Quarter'),
-            dcc.Dropdown(
-                id="quarter_dropdown",
-                options=[{"label": x, "value": x} for x in reversed(get_quarters())],
-                value=['Winter 2020'],
-                multi=True
-            )
-        ]),
+            dbc.Row([
+                html.H6('Quarter'),
+                html.Div([
+                    html.Button(
+                        'All',
+                        id='select-all-quarter',
+                        className='btn btn-light btn-sm',
+                        style={'padding': '0.1rem 0.5rem'}
+                    )
+                ], style={'padding-left': '8px', 'margin-top': '-5px'}),
+                html.Div([
+                    html.Button(
+                        'None',
+                        id='select-none-quarter',
+                        className='btn btn-light btn-sm',
+                        style={'padding': '0.1rem 0.5rem'}
+                    )
+                ], style={'padding-left': '8px', 'margin-top': '-5px'}),
+                html.Div([
+                    html.Button(
+                        'Summer',
+                        id='select-summer',
+                        className='btn btn-light btn-sm',
+                        style={'padding': '0.1rem 0.5rem'}
+                    )
+                ], style={'padding-left': '8px', 'margin-top': '-5px'}),
+                html.Div([
+                    html.Button(
+                        'Fall',
+                        id='select-fall',
+                        className='btn btn-light btn-sm',
+                        style={'padding': '0.1rem 0.5rem'}
+                    )
+                ], style={'padding-left': '8px', 'margin-top': '-5px'}),
+                html.Div([
+                    html.Button(
+                        'Winter',
+                        id='select-winter',
+                        className='btn btn-light btn-sm',
+                        style={'padding': '0.1rem 0.5rem'}
+                    )
+                ], style={'padding-left': '8px', 'margin-top': '-5px'}),
+                html.Div([
+                    html.Button(
+                        'Spring',
+                        id='select-spring',
+                        className='btn btn-light btn-sm',
+                        style={'padding': '0.1rem 0.5rem'}
+                    )
+                ], style={'padding-left': '8px', 'margin-top': '-5px'})
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Dropdown(
+                        id="quarter_dropdown",
+                        options=[{"label": x, "value": x} for x in reversed(get_quarters())],
+                        value=['Winter 2020'],
+                        multi=True
+                    )
+                ], style={'padding': '0px'})
+            ])
+        ], style={'padding-left': '30px', 'padding-right': '30px'}),
         dbc.Col([
             html.H6('Dept.'),
             dcc.Dropdown(
@@ -70,20 +124,20 @@ main_page_layout = html.Div([
                 html.H6('Professors'),
                 html.Div([
                     html.Button(
-                        'Select All',
-                        id='select-all',
+                        'All',
+                        id='select-all-prof',
                         className='btn btn-light btn-sm',
                         style={'padding': '0.1rem 0.5rem'}
                     )
-                ], style={'padding-left': '15px', 'margin-top': '-5px'}),
+                ], style={'padding-left': '8px', 'margin-top': '-5px'}),
                 html.Div([
                     html.Button(
-                        'Select None',
-                        id='select-none',
+                        'None',
+                        id='select-none-prof',
                         className='btn btn-light btn-sm',
                         style={'padding': '0.1rem 0.5rem'}
                     )
-                ], style={'padding-left': '15px', 'margin-top': '-5px'})
+                ], style={'padding-left': '8px', 'margin-top': '-5px'})
             ]),
             dbc.Row([
                 dbc.Col([
@@ -138,13 +192,38 @@ main_page_layout = html.Div([
 
 @app.callback(
     Output('quarter_dropdown', 'value'),
+    Output('select-all-quarter', 'n_clicks'),
+    Output('select-none-quarter', 'n_clicks'),
+    Output('select-summer', 'n_clicks'),
+    Output('select-fall', 'n_clicks'),
+    Output('select-winter', 'n_clicks'),
+    Output('select-spring', 'n_clicks'),
     Input('quarter_dropdown', 'options'),
-    State('local', 'data')
+    Input('select-all-quarter', 'n_clicks'),
+    Input('select-none-quarter', 'n_clicks'),
+    Input('select-summer', 'n_clicks'),
+    Input('select-fall', 'n_clicks'),
+    Input('select-winter', 'n_clicks'),
+    Input('select-spring', 'n_clicks'),
+    State('local', 'data'),
+    
 )
-def set_quarters_value(available_options, storage):
-    if storage and 'stored_quarters' in storage and storage['stored_quarters']:
-        return storage['stored_quarters']
-    return [available_options[0]['value']]
+def set_quarters_value(available_options, all_clicks, none_clicks, summer_clicks, fall_clicks, winter_clicks, spring_clicks, storage):
+    if all_clicks:
+        return [i['value'] for i in available_options], 0, 0, 0, 0, 0, 0
+    elif none_clicks:
+        return [], 0, 0, 0, 0, 0, 0
+    elif summer_clicks:
+        return [i['value'] for i in available_options if i['value'].startswith('Summer')], 0, 0, 0, 0, 0, 0
+    elif fall_clicks:
+        return [i['value'] for i in available_options if i['value'].startswith('Fall')], 0, 0, 0, 0, 0, 0
+    elif winter_clicks:
+        return [i['value'] for i in available_options if i['value'].startswith('Winter')], 0, 0, 0, 0, 0, 0
+    elif spring_clicks:
+        return [i['value'] for i in available_options if i['value'].startswith('Spring')], 0, 0, 0, 0, 0, 0
+    elif storage and 'stored_quarters' in storage and storage['stored_quarters']:
+        return storage['stored_quarters'], 0, 0, 0, 0, 0, 0
+    return [available_options[0]['value']], 0, 0, 0, 0, 0, 0
 
 # Department
 @app.callback(
@@ -205,11 +284,11 @@ def set_professor_options(selected_quarters, selected_department, selected_numbe
 
 @app.callback(
     Output('professor_dropdown', 'value'),
-    Output('select-all', 'n_clicks'),
-    Output('select-none', 'n_clicks'),
+    Output('select-all-prof', 'n_clicks'),
+    Output('select-none-prof', 'n_clicks'),
     Input('professor_dropdown', 'options'),
-    Input('select-all', 'n_clicks'),
-    Input('select-none', 'n_clicks'),
+    Input('select-all-prof', 'n_clicks'),
+    Input('select-none-prof', 'n_clicks'),
     State('local', 'data'),
 )
 def set_professor_value(available_options, all_clicks, none_clicks, storage):
@@ -219,7 +298,7 @@ def set_professor_value(available_options, all_clicks, none_clicks, storage):
         return [], 0, 0
     else:
         if available_options == []:
-            return []
+            return [], 0, 0
         professors = []
         for o in available_options:
             if storage and 'stored_professors' in storage and o['value'] in storage['stored_professors']:
@@ -284,6 +363,12 @@ professor_page_layout = html.Div([
             html.H6('Professor'),
             dcc.Dropdown(
                 id="professor_dropdown_index"
+            )
+        ], width=2),
+        dbc.Col([
+            dcc.Checklist(
+                options=[{'label': ' Show Pass/Fail Courses', 'value': 'show_na'}],
+                id="show_na_check"
             )
         ], width=2)
     ]),
@@ -369,6 +454,14 @@ def set_professor_index_value(available_options, storage):
         return storage['stored_professor']
     return available_options[0]['value']
 
+# # Show N/A
+# @app.callback(
+#     Output('show_na_check', 'options'),
+#     Input('show_na_check', 'value')
+# )
+# def set_show_na_value(show_na):
+#     return True
+
 # Table
 @app.callback(
     Output('statistics_table_index', 'data'),
@@ -376,15 +469,16 @@ def set_professor_index_value(available_options, storage):
     Output('local_index', 'data'),
     Input('department_dropdown_index', 'value'),
     Input('professor_dropdown_index', 'value'),
+    Input('show_na_check', 'value'),
     State('local_index', 'data')
 )
 
-def set_table(department, professor, storage):
+def set_table(department, professor, show_na, storage):
     if not storage or storage.keys is not default_store_index.keys:
         storage = default_store_index
     storage['stored_department'] = department
     storage['stored_professor'] = professor
-    stats = get_statistics_of_professor(professor)
+    stats = get_statistics_of_professor(professor, show_na)
     return stats[0], stats[1], storage
 
 
@@ -400,7 +494,7 @@ def display_page(pathname):
     return html.Div('404: Page not found')
 
 app.run_server(
-# debug=True,
+debug=True,
 dev_tools_ui=False
 , host='0.0.0.0')
-# app.config.suppress_callback_exceptions = True
+# app.config.suppress_callback_exceptions = False

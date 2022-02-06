@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
+import re
+import json
+from os.path import exists
 import plotly.express as px
 from collections import Counter
 
 labels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
 gpas = [4.0, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7, 1.3, 1.0, 0.7, 0.0]
+na = '---'
 
 file = pd.ExcelFile(r'grades.xlsx')
 quarter_sheets = dict()
@@ -12,24 +16,31 @@ quarter_sheets_no_quarter = dict()
 statistics = []
 
 def get_quarters():
-    # return ['Winter 2021']
-    return file.sheet_names
+    return ['Winter 2021', 'Fall 2020', 'Spring 2020', 'Winter 2020', 'Fall 2019', 'Spring 2019']
+    # return file.sheet_names
 
 def populate_quarter_sheets():
     if len(quarter_sheets) == 0:
         for q in get_quarters():
-            d = file.parse(q)
-            d.Course = d.Course.replace('\s+', ' ', regex=True)
-            d.Course = d.Course.str.replace('ES 1-', 'ES', regex=False)
-            d.Course = d.Course.str.replace('(?<=ED .) ', '', regex=True)
-            d.Course = d.Course.str.replace('(?<=ED .{2}) ', '', regex=True)
-            quarter_sheets_no_quarter[q] = d.copy()
+            path = 'data/' + q + '.txt'
+            if exists(path):
+                d = pd.read_json(path)
+                quarter_sheets_no_quarter[q] = d
+            else:
+                d = file.parse(q)
+                d.Course = d.Course.replace('\s+', ' ', regex=True)
+                d.Course = d.Course.str.replace('ES 1-', 'ES', regex=False)
+                d.Course = d.Course.str.replace('ED HSS', 'ED HSS ', regex=False)
+                d.Course = d.Course.str.replace('ED SPS', 'ED SPS ', regex=False)
+                # d.Course = d.Course.str.replace('(?<=ED .) ', '', regex=True)
+                # d.Course = d.Course.str.replace('(?<=ED .{2}) ', '', regex=True)
+                quarter_sheets_no_quarter[q] = d.copy()
+                f = open(path, 'w+')
+                f.write(json.dumps(json.loads(d.to_json())))
+                f.close()
             d['Instructor'] = d['Instructor'] + ' (' + q + ')'
             quarter_sheets[q] = d
 
-def get_classes_based_off_quarter(quarters):
-    data = pd.concat([quarter_sheets[q] for q in quarters])
-    return data['Course'].unique()
 
 def get_departments_based_off_quarter(quarters):
     data = pd.concat([quarter_sheets[q] for q in quarters])
@@ -37,12 +48,12 @@ def get_departments_based_off_quarter(quarters):
     return sorted(list(set(departments)))
 
 def get_numbers_based_off_quarters_and_department(quarters, department):
-    common_course_numbers = None
+    union_course_numbers = None
     for q in quarters:
         courses = [c for c in quarter_sheets[q]['Course'].unique() if c[:c.rfind(' ')] == department]
         course_numbers = [c.split(' ')[-1] for c in courses]
-        common_course_numbers = course_numbers if not common_course_numbers else intersection(common_course_numbers, course_numbers)
-    return common_course_numbers
+        union_course_numbers = course_numbers if not union_course_numbers else union(union_course_numbers, course_numbers)
+    return union_course_numbers
 
 def get_professor_based_off_class_and_quarter(course, quarters):
     data = pd.concat([quarter_sheets[q] for q in quarters])
@@ -79,9 +90,19 @@ def std_dev(counts, gpas):
         result += ((gpas[i] - mean)**2) * counts[i]
     return (result/np.sum(counts))**(0.5)
 
-def intersection(lst1, lst2):
-    temp = set(lst2)
-    return [value for value in lst1 if value in temp]
+def points_to_grade(points):
+    if points == na:
+        return ''
+    return ' (' + labels[len(labels) - np.searchsorted(gpas[::-1], points, side='right')] + ')'
+
+def splitter(x):
+    match = re.compile("[^\W\d]").search(x)
+    if match:
+        return (int(x[:match.start()]), x[match.start():])
+    return (int(x), '')
+
+def union(lst1, lst2):
+    return sorted(set(lst1).union(set(lst2)), key=lambda x:splitter(x))
 
 def get_professor_based_off_department(department):
     data = pd.concat([quarter_sheets_no_quarter[q] for q in get_quarters()])[['Course', 'Instructor']]
@@ -91,7 +112,7 @@ def get_professor_based_off_department(department):
     professors = [str(s) for s in professors]
     return sorted(professors)
 
-def get_statistics_of_professor(professor):
+def get_statistics_of_professor(professor, show_na):
     statistics = []
     total_counts = pd.DataFrame()
     for q in get_quarters():
@@ -108,23 +129,25 @@ def get_statistics_of_professor(professor):
             else:
                 total_counts = total_counts + counts
 
-            med = median(counts, gpas) or 'N/A'
+            med = median(counts, gpas) or na
             mean = round(avg(counts, gpas), 2)
             if np.isnan(mean):
-                mean = 'N/A'
+                mean = na
             dev = round(std_dev(counts, gpas), 2)
             if np.isnan(dev):
-                dev = 'N/A'
-            statistics.append({'Quarter': q, 'Course': course, 'Median': str(med), 'Average': str(mean), 'Standard Deviation': str(dev)})
+                dev = na
 
-    med = median(total_counts, gpas) or 'N/A'
-    mean = round(avg(counts, gpas), 2)
+            if (show_na or not (med is na or mean is na or dev is na)):
+                statistics.append({'Quarter': q, 'Course': course, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev)})
+
+    med = median(total_counts, gpas) or na
+    mean = round(avg(total_counts, gpas), 2)
     if np.isnan(mean):
-        mean = 'N/A'
-    dev = round(std_dev(counts, gpas), 2)
+        mean = na
+    dev = round(std_dev(total_counts, gpas), 2)
     if np.isnan(dev):
-        dev = 'N/A'
-    return statistics, [{'Overall Median': str(med), 'Overall Average': str(mean), 'Overall Standard Deviation': str(dev)}]
+        dev = na
+    return statistics, [{'Overall Median': str(med) + points_to_grade(med), 'Overall Average': str(mean) + points_to_grade(mean), 'Overall Standard Deviation': str(dev)}]
 
 #——————————————————————————————————————————————————————————#
 
@@ -147,14 +170,14 @@ def plot(course, quarters, professors, percentage):
         other.columns = ['Grade', professor]
 
         counts = pd.DataFrame({'Grade': labels}).set_index('Grade').join(other.set_index('Grade'))[professor].fillna(0)
-        med = median(counts, gpas) or 'N/A'
+        med = median(counts, gpas) or na
         mean = round(avg(counts, gpas), 2)
         if np.isnan(mean):
-            mean = 'N/A'
+            mean = na
         dev = round(std_dev(counts, gpas), 2)
         if np.isnan(dev):
-            dev = 'N/A'
-        statistics.append({'Professor': professor, 'Median': str(med), 'Average': str(mean), 'Standard Deviation': str(dev)})
+            dev = na
+        statistics.append({'Professor': professor, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev)})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)

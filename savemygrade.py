@@ -16,16 +16,17 @@ quarter_sheets_no_quarter = dict()
 statistics = []
 
 def get_quarters():
-    return ['Winter 2021', 'Fall 2020', 'Spring 2020', 'Winter 2020', 'Fall 2019', 'Spring 2019']
-    # return file.sheet_names
+    # return ['Winter 2021', 'Fall 2020', 'Spring 2020', 'Winter 2020', 'Fall 2019', 'Spring 2019']
+    return file.sheet_names
 
 def populate_quarter_sheets():
+    print('begin pop')
     if len(quarter_sheets) == 0:
         for q in get_quarters():
             path = 'data/' + q + '.txt'
             if exists(path):
                 d = pd.read_json(path)
-                quarter_sheets_no_quarter[q] = d
+                quarter_sheets_no_quarter[q] = d.copy()
             else:
                 d = file.parse(q)
                 d.Course = d.Course.replace('\s+', ' ', regex=True)
@@ -40,6 +41,7 @@ def populate_quarter_sheets():
                 f.close()
             d['Instructor'] = d['Instructor'] + ' (' + q + ')'
             quarter_sheets[q] = d
+    print('end pop')
 
 
 def get_departments_based_off_quarter(quarters):

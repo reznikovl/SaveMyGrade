@@ -22,7 +22,7 @@ app.layout = html.Div([
 
     dbc.NavbarSimple(
         children=[
-            dbc.NavItem(dbc.NavLink("Disbtributions", href="/")),
+            dbc.NavItem(dbc.NavLink("Distributions", href="/")),
             dbc.NavItem(dbc.NavLink("Professors", href="/professors")),
             dbc.NavItem(dbc.NavLink("About", href="/about")),
         ],

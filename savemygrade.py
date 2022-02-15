@@ -20,6 +20,8 @@ def get_quarters():
     return file.sheet_names
 
 def populate_quarter_sheets():
+    # profs = json.loads('data/profs.txt')
+
     if len(quarter_sheets) == 0:
         for q in get_quarters():
             path = 'data/' + q + '.txt'
@@ -40,9 +42,8 @@ def populate_quarter_sheets():
                 f.close()
 
             abbrev = ('M' if q.startswith('Summer') else q[0]) + q.split(' ')[1][2:]
-            d['Instructor'] = d['Instructor'] + ' (' + abbrev + ')'
+            d['Instructor'] = d['Instructor'] + ' (' + abbrev + ') '
             quarter_sheets[q] = d
-
 
 def get_departments_based_off_quarter(quarters):
     data = pd.concat([quarter_sheets[q] for q in quarters])
@@ -73,20 +74,20 @@ def get_professor_based_off_class_and_quarter(course, quarters):
 
     return professors
 
-def avg(counts, gpas):
+def avg(counts):
     total = np.sum(counts)
     return np.sum(np.dot(counts, gpas)) / total
 
-def median(counts, gpas):
+def median(counts):
     n = 0
     half_students = np.sum(counts)/2
     for i in range(len(gpas)):
         n += counts[i]
         if (n > half_students):
-            return gpas[i]
+            return str(gpas[i]) + ' (' + str(labels[i]) + ')'
 
-def std_dev(counts, gpas):
-    mean = avg(counts, gpas)
+def std_dev(counts):
+    mean = avg(counts)
     result = 0
     for i in range(len(gpas)):
         result += ((gpas[i] - mean)**2) * counts[i]
@@ -131,25 +132,25 @@ def get_statistics_of_professor(professor, show_na):
             else:
                 total_counts = total_counts + counts
 
-            med = median(counts, gpas) or na
-            mean = round(avg(counts, gpas), 2)
+            med = median(counts) or na
+            mean = round(avg(counts), 2)
             if np.isnan(mean):
                 mean = na
-            dev = round(std_dev(counts, gpas), 2)
+            dev = round(std_dev(counts), 2)
             if np.isnan(dev):
                 dev = na
 
             if (show_na or not (med is na or mean is na or dev is na)):
-                statistics.append({'Quarter': q, 'Course': course, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev), 'Count': sum(df[professor])})
+                statistics.append({'quarter': q, 'course': course, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(df[professor])})
 
-    med = median(total_counts, gpas) or na
-    mean = round(avg(total_counts, gpas), 2)
+    med = median(total_counts) or na
+    mean = round(avg(total_counts), 2)
     if np.isnan(mean):
         mean = na
-    dev = round(std_dev(total_counts, gpas), 2)
+    dev = round(std_dev(total_counts), 2)
     if np.isnan(dev):
         dev = na
-    return statistics, [{'Overall Median': str(med) + points_to_grade(med), 'Overall Average': str(mean) + points_to_grade(mean), 'Overall Standard Deviation': str(dev)}]
+    return statistics, [{'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev)}]
 
 #——————————————————————————————————————————————————————————#
 
@@ -172,14 +173,15 @@ def plot(course, quarters, professors, percentage):
         other.columns = ['Grade', professor]
 
         counts = pd.DataFrame({'Grade': labels}).set_index('Grade').join(other.set_index('Grade'))[professor].fillna(0)
-        med = median(counts, gpas) or na
-        mean = round(avg(counts, gpas), 2)
+        med = median(counts) or na
+        
+        mean = round(avg(counts), 2)
         if np.isnan(mean):
             mean = na
-        dev = round(std_dev(counts, gpas), 2)
+        dev = round(std_dev(counts), 2)
         if np.isnan(dev):
             dev = na
-        statistics.append({'Professor': professor, 'Median': str(med) + points_to_grade(med), 'Average': str(mean) + points_to_grade(mean), 'Standard Deviation': str(dev), 'Count': sum(other[professor])})
+        statistics.append({'professor': professor, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(other[professor])})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)

@@ -50,7 +50,7 @@ def display_page(pathname):
     return html.Div('404: Page not found')
 
 app.run_server(
-debug=True,
+debug=False,
 dev_tools_ui=False
 , host='0.0.0.0')
 # app.config.suppress_callback_exceptions = False

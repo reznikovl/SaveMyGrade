@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import re
 import json
+import pickle
 from os.path import exists
 import plotly.express as px
 from collections import Counter
@@ -12,6 +13,7 @@ gpas = [4.0, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7, 1.3, 1.0, 0.7, 0.0]
 na = '---'
 
 file = pd.ExcelFile(r'grades.xlsx')
+professor_data = dict()
 quarter_sheets = dict()
 quarter_sheets_no_quarter = dict()
 statistics = []
@@ -20,7 +22,9 @@ def get_quarters():
     return file.sheet_names
 
 def populate_quarter_sheets():
-    # profs = json.loads('data/profs.txt')
+    if not professor_data:
+        with open('data/profs.txt', 'r') as j:
+            professor_data.update(json.loads(j.read()))
 
     if len(quarter_sheets) == 0:
         for q in get_quarters():
@@ -107,6 +111,30 @@ def splitter(x):
 def union(lst1, lst2):
     return sorted(set(lst1).union(set(lst2)), key=lambda x:splitter(x))
 
+def get_data(professor):
+    if professor in professor_data:
+        return professor_data[professor]
+    elif professor.rsplit(' ', 1)[0] in professor_data:
+        return professor_data[professor.rsplit(' ', 1)[0]]
+    else:
+        parts = professor.split(' ')
+        if len(parts) == 2:
+            arrange = ' '.join([parts[0], parts[1][0]])
+            if arrange in professor_data:
+                return professor_data[arrange]
+
+        for k, v in professor_data.items():
+            if str(k).startswith(professor) \
+                or (str(k).startswith(professor.split(' ', 1)[0]) and True):
+                return v
+        return 'N/A'
+
+def get_rating(professor):
+    data = get_data(professor)
+    if data == 'N/A' or data[1] == 'N/A':
+        return '---'
+    return data[1] + ('*' if data[2] <= 5 else '')
+
 def get_professor_based_off_department(department):
     data = pd.concat([quarter_sheets_no_quarter[q] for q in get_quarters()])[['Course', 'Instructor']]
     data = data[data['Course'].str.startswith(department)]
@@ -181,7 +209,7 @@ def plot(course, quarters, professors, percentage):
         dev = round(std_dev(counts), 2)
         if np.isnan(dev):
             dev = na
-        statistics.append({'professor': professor, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(other[professor])})
+        statistics.append({'professor': professor, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(other[professor]), 'rating': str(get_rating(professor.split(' (')[0]))})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)

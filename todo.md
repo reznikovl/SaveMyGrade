@@ -4,6 +4,7 @@ Course distribution table changes
 - options: Deviation, Student Count, Rating
     - all 3 are off by default -->
 - Rating also hyperlinks the prof name
+    - "*" next to rating if only few ratings, with footer "* may be inaccurate due to too few ratings"
 
 Plot
 - change tooltip to just # or % (look at gradetier for reference)

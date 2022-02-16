@@ -27,11 +27,13 @@ main_page_layout = html.Div([
                 select_button('Spring', 'select-spring')
             ]),
             dbc.Row(
-                dcc.Dropdown(
-                    id="quarter_dropdown",
-                    options=[{"label": x, "value": x} for x in reversed(get_quarters())],
-                    value=['Winter 2021'], multi=True, optionHeight=25
-                ),
+                dbc.Col(
+                    dcc.Dropdown(
+                        id="quarter_dropdown",
+                        options=[{"label": x, "value": x} for x in reversed(get_quarters())],
+                        value=['Winter 2021'], multi=True, optionHeight=25
+                    ), className='no-padding'
+                )
             ),
             html.Br(),
             dbc.Row([
@@ -57,9 +59,11 @@ main_page_layout = html.Div([
                 select_button('None', 'select-none-prof')
             ]),
             dbc.Row(
-                dcc.Dropdown(
-                    id="professor_dropdown",
-                    multi=True, optionHeight=25
+                dbc.Col(
+                    dcc.Dropdown(
+                        id="professor_dropdown",
+                        multi=True, optionHeight=25
+                    ), className='no-padding'
                 )
             ),
             html.Br(),
@@ -72,14 +76,19 @@ main_page_layout = html.Div([
             )
         ], width=5, style={'padding': '30px'})
     ]),
+    html.Hr(),
     dbc.Row([
-        dbc.Col(
+        dbc.Col([
             dash_table.DataTable(
                 id='statistics_table',
                 columns=[professor_table_options[0], professor_table_options[3], professor_table_options[4]],
                 sort_action="native", sort_mode="multi",
                 style_cell={'padding': '8px 8px', 'font-family': font}, style_data_conditional=table_style_data_conditional, style_header=table_style_header
-            ), width=7, style={'padding': '30px'}),
+            ),
+            html.Br(),
+            html.H6('* may be inaccurate due to too few ratings', style={'font-size': '.8rem', 'margin-bottom': '0rem'}),
+            html.I('Rating data is taken from ratemyprofessor.com and may contain errors', style={'font-size': '.8rem'})
+        ], width=7, style={'padding': '30px'}),
         dbc.Col(
             dcc.Checklist(
                 id="professor_table_options",

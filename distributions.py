@@ -83,7 +83,12 @@ main_page_layout = html.Div([
                 id='statistics_table',
                 columns=[professor_table_options[0], professor_table_options[3], professor_table_options[4]],
                 sort_action="native", sort_mode="multi",
-                style_cell={'padding': '8px 8px', 'font-family': font}, style_data_conditional=table_style_data_conditional, style_header=table_style_header
+                style_cell={'padding': '8px 8px', 'font-family': font}, style_data_conditional=table_style_data_conditional, style_header=table_style_header,
+                css=[
+                    {'selector': '.cell-markdown', 'rule': 'font-family: ' + font + '; text-align: right;'},
+                    {'selector': 'p', 'rule': 'margin-bottom: inherit;'},
+                    {'selector': 'a', 'rule': 'text-decoration: underline;'}
+                ],
             ),
             html.Br(),
             html.H6('* may be inaccurate due to too few ratings', style={'font-size': '.8rem', 'margin-bottom': '0rem'}),

@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import re
 import json
-import pickle
 from os.path import exists
 import plotly.express as px
 from collections import Counter
@@ -132,8 +131,8 @@ def get_data(professor):
 def get_rating(professor):
     data = get_data(professor)
     if data == 'N/A' or data[1] == 'N/A':
-        return '---'
-    return data[1] + ('*' if data[2] <= 5 else '')
+        return '\\' + na, None
+    return data[1] + ('*' if data[2] <= 5 else ''), data[0]
 
 def get_professor_based_off_department(department):
     data = pd.concat([quarter_sheets_no_quarter[q] for q in get_quarters()])[['Course', 'Instructor']]
@@ -209,7 +208,10 @@ def plot(course, quarters, professors, percentage):
         dev = round(std_dev(counts), 2)
         if np.isnan(dev):
             dev = na
-        statistics.append({'professor': professor, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(other[professor]), 'rating': str(get_rating(professor.split(' (')[0]))})
+        
+        rating, id = get_rating(professor.split(' (')[0])
+
+        statistics.append({'professor': professor, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(other[professor]), 'rating': rating_display})
 
         if percentage:
             other[professor] = other[professor].div(np.sum(other[professor]), axis=0)

@@ -26,7 +26,7 @@ professor_table_options = [
     {'name': 'Average', 'id': 'average'}, 
     {'name': 'Deviation', 'id': 'deviation'}, 
     {'name': 'Count', 'id': 'count'}, 
-    {'name': 'Rating', 'id': 'rating'},
+    {'name': 'Rating', 'id': 'rating', 'type': 'text', 'presentation': 'markdown'},
 ]
 
 table_cumulative_options = [

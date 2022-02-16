@@ -2,9 +2,13 @@ Course distribution table changes
 <!-- - table on left, options on right
     - equal vertical padding
 - options: Deviation, Student Count, Rating
-    - all 3 are off by default -->
+    - all 3 are off by default
 - Rating also hyperlinks the prof name
-    - "*" next to rating if only few ratings, with footer "* may be inaccurate due to too few ratings"
+    - "*" next to rating if only few ratings, with footer "* may be inaccurate due to too few ratings" -->
+- remove selectable
+- change sorting
+    - sorts by ascending on first click
+    - "---" has least value
 
 Plot
 - change tooltip to just # or % (look at gradetier for reference)

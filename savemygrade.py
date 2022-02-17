@@ -210,6 +210,7 @@ def plot(course, quarters, professors, percentage):
             dev = na
         
         rating, id = get_rating(professor.split(' (')[0])
+        rating_display = '[' + str(rating) + '](https://www.ratemyprofessors.com/ShowRatings.jsp?tid=' + str(id) + ')' if id else str(rating)
 
         statistics.append({'professor': professor, 'median': str(med), 'average': str(mean) + points_to_grade(mean), 'deviation': str(dev), 'count': sum(other[professor]), 'rating': rating_display})
 
